@@ -186,10 +186,10 @@ static CreateDevice_t oCreateDevice = nullptr;
 static Present_t oPresent = nullptr;
 static Reset_t oReset = nullptr;
 
-static HRESULT WINAPI hkPresent(IDirect3DDevice8* dev, const RECT* src, const RECT* dst, HWND wnd, const RGNDATA* dirty) {
+static void DrawFrame(IDirect3DDevice8* dev) {
     static bool first = true;
     if (first) { first = false; Log("Premier Present intercepte (device=%p)", (void*)dev); }
-    if (g_cfg.debugRender == 0) return oPresent(dev, src, dst, wnd, dirty);
+    if (g_cfg.debugRender == 0) return;
     if (!g_imguiReady) InitImGui(dev);
 
     HandleKeys();
@@ -209,9 +209,51 @@ static HRESULT WINAPI hkPresent(IDirect3DDevice8* dev, const RECT* src, const RE
             dev->EndScene();
         }
     }
+}
+
+// Mesures de performance, écrites dans le log toutes les 5 secondes
+struct PerfStats {
+    LARGE_INTEGER freq = {}, last = {}, windowStart = {};
+    double sumFrame = 0, maxFrame = 0, sumMod = 0, maxMod = 0, sumPresent = 0;
+    int frames = 0;
+};
+static PerfStats g_perf;
+
+static double Ms(LARGE_INTEGER a, LARGE_INTEGER b) { return (b.QuadPart - a.QuadPart) * 1000.0 / g_perf.freq.QuadPart; }
+
+static HRESULT WINAPI hkPresent(IDirect3DDevice8* dev, const RECT* src, const RECT* dst, HWND wnd, const RGNDATA* dirty) {
+    LARGE_INTEGER t0, t1, t2;
+    if (!g_perf.freq.QuadPart) QueryPerformanceFrequency(&g_perf.freq);
+    QueryPerformanceCounter(&t0);
+
+    DrawFrame(dev);
+
+    QueryPerformanceCounter(&t1);
     HRESULT hr = oPresent(dev, src, dst, wnd, dirty);
+    QueryPerformanceCounter(&t2);
+
     static HRESULT lastPresent = D3D_OK;
     if (hr != lastPresent) { Log("Present -> 0x%08lX", (unsigned long)hr); lastPresent = hr; }
+
+    PerfStats& p = g_perf;
+    if (p.last.QuadPart) {
+        double frame = Ms(p.last, t0), mod = Ms(t0, t1);
+        p.sumFrame += frame; if (frame > p.maxFrame) p.maxFrame = frame;
+        p.sumMod += mod; if (mod > p.maxMod) p.maxMod = mod;
+        p.sumPresent += Ms(t1, t2);
+        p.frames++;
+    } else {
+        p.windowStart = t0;
+    }
+    p.last = t0;
+    if (p.frames && Ms(p.windowStart, t0) >= 5000.0) {
+        Log("Perf : %.1f img/s, image moy %.1f ms (max %.1f), mod moy %.3f ms (max %.2f), Present moy %.1f ms",
+            p.frames * 1000.0 / Ms(p.windowStart, t0), p.sumFrame / p.frames, p.maxFrame,
+            p.sumMod / p.frames, p.maxMod, p.sumPresent / p.frames);
+        p.sumFrame = p.maxFrame = p.sumMod = p.maxMod = p.sumPresent = 0;
+        p.frames = 0;
+        p.windowStart = t0;
+    }
     return hr;
 }
 
@@ -284,7 +326,9 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         DisableThreadLibraryCalls(inst);
         GetModuleFileNameA(nullptr, g_dir, MAX_PATH);
         char* slash = strrchr(g_dir, '\\');
-        if (slash) *slash = 0;
+        // settings.exe charge aussi dinput8.dll : hors de PES6.exe on reste un simple relais
+        if (!slash || lstrcmpiA(slash + 1, "PES6.exe") != 0) return TRUE;
+        *slash = 0;
         wsprintfA(g_ini, "%s\\pes6fun.ini", g_dir);
         char logPath[MAX_PATH];
         wsprintfA(logPath, "%s\\pes6fun.log", g_dir);
