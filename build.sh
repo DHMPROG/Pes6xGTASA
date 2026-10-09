@@ -14,7 +14,7 @@ done
 IMGUI=third_party/imgui
 $CXX -O2 -std=c++17 -static -shared \
     -I third_party/minhook/include -I $IMGUI -I $IMGUI/backends \
-    src/main.cpp src/proxy.cpp src/imgui_impl_dx8.cpp \
+    src/main.cpp src/proxy.cpp src/imgui_impl_dx8.cpp src/debugtools.cpp \
     $IMGUI/imgui.cpp $IMGUI/imgui_draw.cpp $IMGUI/imgui_tables.cpp $IMGUI/imgui_widgets.cpp \
     $IMGUI/backends/imgui_impl_win32.cpp \
     build/obj/*.o src/dinput8.def \

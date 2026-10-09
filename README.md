@@ -36,6 +36,8 @@ Pour désinstaller, supprime `dinput8.dll`, plus `pes6fun.ini` et `pes6fun.log` 
 |---|---|
 | F9 | Activer / désactiver le Mode FUN |
 | F10 | Test : affiche « WASTED » (Mode FUN activé) |
+| F11 | Debug : copie la mémoire du jeu dans `pes6fun_dumps\` (pour le développement) |
+| F12 | Debug : panneau avec la position du ballon et du joueur actif |
 
 Les touches se changent dans `pes6fun.ini`, créé à côté de `PES6.exe` :
 
@@ -81,4 +83,5 @@ Code sous licence [MIT](LICENSE). Elle couvre uniquement le code du mod, pas les
 - [MinHook](https://github.com/TsudaKageyu/minhook) (BSD 2-Clause), Tsuda Kageyu
 - [Dear ImGui](https://github.com/ocornut/imgui) (MIT), Omar Cornut
 - [llvm-mingw](https://github.com/mstorsjo/llvm-mingw), Martin Storsjö
+- Adresses mémoire du ballon et du joueur actif : [pes6_game_physics_mod](https://github.com/angelballay/pes6_game_physics_mod) (MIT), Angel Ballay
 - Code écrit avec l'aide de Claude Code (IA d'Anthropic).

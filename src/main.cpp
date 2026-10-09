@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_dx8.h"
 #include "imgui_impl_win32.h"
+#include "debugtools.h"
 
 // ---------------------------------------------------------------- log + config
 
@@ -17,7 +18,7 @@ static char g_dir[MAX_PATH];   // dossier de PES6.exe
 static char g_ini[MAX_PATH];
 static FILE* g_log = nullptr;
 
-static void Log(const char* fmt, ...) {
+void Log(const char* fmt, ...) {
     if (!g_log) return;
     SYSTEMTIME t;
     GetLocalTime(&t);
@@ -34,6 +35,9 @@ struct Config {
     bool modeFun = false;
     int toggleKey = VK_F9;
     int testKey = VK_F10;
+    int dumpKey = VK_F11;
+    int debugKey = VK_F12;
+    bool debugPanel = false;
     int debugRender = 2;   // 0 = hooks seuls, 1 = frame ImGui sans dessin D3D, 2 = overlay complet
 };
 static Config g_cfg;
@@ -42,6 +46,9 @@ static void LoadConfig() {
     g_cfg.modeFun = GetPrivateProfileIntA("General", "ModeFun", 0, g_ini) != 0;
     g_cfg.toggleKey = GetPrivateProfileIntA("Keys", "ToggleModeFun", VK_F9, g_ini);
     g_cfg.testKey = GetPrivateProfileIntA("Keys", "Test", VK_F10, g_ini);
+    g_cfg.dumpKey = GetPrivateProfileIntA("Keys", "Dump", VK_F11, g_ini);
+    g_cfg.debugKey = GetPrivateProfileIntA("Keys", "DebugPanel", VK_F12, g_ini);
+    g_cfg.debugPanel = GetPrivateProfileIntA("Debug", "Panel", 0, g_ini) != 0;
     g_cfg.debugRender = GetPrivateProfileIntA("Debug", "Render", 2, g_ini);
 }
 
@@ -93,6 +100,15 @@ static void HandleKeys() {
         g_testUntil = Now() + 1.5;
         Log("Test F10");
     }
+    if (KeyPressed(g_cfg.debugKey)) {
+        g_cfg.debugPanel = !g_cfg.debugPanel;
+        WritePrivateProfileStringA("Debug", "Panel", g_cfg.debugPanel ? "1" : "0", g_ini);
+    }
+    if (KeyPressed(g_cfg.dumpKey)) {
+        char note[32];
+        wsprintfA(note, "F11 #%lu", (unsigned long)(GetTickCount64() / 1000));
+        Debug_Dump(g_dir, note);
+    }
 }
 
 static void DrawOverlay() {
@@ -128,6 +144,8 @@ static void DrawOverlay() {
         OutlinedText(dl, font, size, ImVec2((screen.x - sz.x) / 2, (screen.y - sz.y) / 2),
                      IM_COL32(200, 30, 30, 255), label);
     }
+
+    if (g_cfg.debugPanel) Debug_DrawPanel();
 }
 
 static void InitImGui(IDirect3DDevice8* dev) {
