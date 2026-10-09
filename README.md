@@ -72,6 +72,10 @@ Plus de détails techniques dans [`MODDING_PLAN.md`](MODDING_PLAN.md).
 - Mod **hors ligne et solo** uniquement.
 - PES et Pro Evolution Soccer sont des marques de Konami. GTA et Grand Theft Auto sont des marques de Rockstar Games. Ce projet n'est affilié à aucun des deux.
 
+## Licence
+
+Code sous licence [MIT](LICENSE). Elle couvre uniquement le code du mod, pas les jeux.
+
 ## Crédits
 
 - [MinHook](https://github.com/TsudaKageyu/minhook) (BSD 2-Clause), Tsuda Kageyu
