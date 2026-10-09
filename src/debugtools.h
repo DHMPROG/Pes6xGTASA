@@ -3,3 +3,5 @@
 
 void Debug_DrawPanel();                                // à appeler entre NewFrame et Render
 void Debug_Dump(const char* gameDir, const char* note);  // copie .data dans <jeu>\pes6fun_dumps
+void Debug_Tick();                                     // filtre « joueur contrôlé », à appeler à chaque image
+void Debug_FinderReset();                              // relance la recherche

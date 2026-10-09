@@ -23,6 +23,14 @@ constexpr uintptr_t kPlayerAnim = 0x04;      // pointeur animation
 constexpr uintptr_t kPlayerPhysics = 0xD0;   // pointeur sous-structure physique (pos à +0)
 constexpr uintptr_t kPlayerPos = 0xE0;       // float x, y (vertical), z
 
+// Tableau des acteurs du match (trouvé par nous avec les copies F11, 2026-10-09) :
+// 23 fiches de 0x240 octets. 0 = arbitre, 1..11 = équipe A (1 = gardien), 12..22 = équipe B (12 = gardien).
+// L'identifiant « porteur du ballon » (kBallActorId) est un index dans ce tableau.
+constexpr uintptr_t kActorPos0   = 0x03BDCA60;  // float x, y, z de l'acteur 0 (y = 0 au sol)
+constexpr uintptr_t kActorStride = 0x240;
+constexpr int kActorCount = 23;
+inline uintptr_t ActorPos(int i) { return kActorPos0 + i * kActorStride; }
+
 // Section .data (variables globales + BSS) : 0xBC4000 .. 0x3D59000
 constexpr uintptr_t kDataBegin = kBase + 0x7C4000;
 constexpr uintptr_t kDataEnd   = kBase + 0x7C4000 + 0x3195000;

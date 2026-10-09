@@ -145,7 +145,10 @@ static void DrawOverlay() {
                      IM_COL32(200, 30, 30, 255), label);
     }
 
-    if (g_cfg.debugPanel) Debug_DrawPanel();
+    if (g_cfg.debugPanel) {
+        Debug_Tick();
+        Debug_DrawPanel();
+    }
 }
 
 static void InitImGui(IDirect3DDevice8* dev) {
