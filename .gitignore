@@ -1,0 +1,13 @@
+# Compilateur portable (téléchargé par setup.sh)
+tools/
+# Sorties de compilation
+build/
+# Sauvegardes locales : contiennent des fichiers du jeu, ne jamais publier
+backups/
+# Fichiers de jeu ou extraits des jeux (jamais dans le dépôt)
+*.exe
+*.afs
+*.img
+*.dff
+*.txd
+pes6fun.log
