@@ -47,7 +47,7 @@ Pourquoi : il n'existe pas d'API de modding pour la logique de match. Kitserver 
 - [x] Ballon : `[0xBCCE94]` -> structure du ballon (fixe à `0x010105E0`), position float x/y/z à +0x20 (y = -28 au sol), état à +0x84 (0 conduite, 1 passe, 3 centre, 4 tir, 5 arrêté). Source : pes6_game_physics_mod (Angel Ballay, MIT), vérifiée sur notre exe.
 - [x] Porteur du ballon : octet à `0x3BE09CC`, c'est un index dans le tableau des acteurs.
 - [x] Tableau des acteurs (trouvé avec les copies F11) : 23 fiches de `0x240` octets, position float x/y/z de l'acteur 0 à `0x03BDCA60`. 0 = arbitre, 1..11 = équipe A (1 = gardien), 12..22 = équipe B (12 = gardien). Terrain : buts vers x = ±13200, touches vers z = ±8500.
-- [ ] Index du joueur contrôlé : filtre en direct dans le panneau F12 (`re/` contient les scripts d'analyse des copies)
+- [ ] Index du joueur contrôlé : le filtre F12 a gardé `0x03BCE05C` / `0x03BCECD0` (équipe A) et `0x03BCE04C` (équipe B). À confirmer en changeant de joueur sans le ballon (cercles jaunes du radar).
 - [ ] État du match (en jeu / pause / menu)
 - [ ] Matrices vue/projection (apitrace, RenderDoc ne gère pas D3D8) : hook de `SetTransform` / `SetVertexShaderConstant`
 - [ ] Façon sûre de « neutraliser » un adversaire sans faire planter le moteur de match

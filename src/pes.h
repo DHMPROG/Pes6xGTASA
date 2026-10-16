@@ -31,6 +31,12 @@ constexpr uintptr_t kActorStride = 0x240;
 constexpr int kActorCount = 23;
 inline uintptr_t ActorPos(int i) { return kActorPos0 + i * kActorStride; }
 
+// Joueur contrôlé, u8 = index dans le tableau des acteurs (filtre F12 du 2026-10-09, à confirmer) :
+// équipe A : 0x03BCE05C (autre candidat restant : 0x03BCECD0), équipe B : 0x03BCE04C (16 octets avant).
+constexpr uintptr_t kCtrlTeamA = 0x03BCE05C;
+constexpr uintptr_t kCtrlTeamA2 = 0x03BCECD0;
+constexpr uintptr_t kCtrlTeamB = 0x03BCE04C;
+
 // Section .data (variables globales + BSS) : 0xBC4000 .. 0x3D59000
 constexpr uintptr_t kDataBegin = kBase + 0x7C4000;
 constexpr uintptr_t kDataEnd   = kBase + 0x7C4000 + 0x3195000;

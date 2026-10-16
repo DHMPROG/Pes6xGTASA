@@ -11,6 +11,7 @@
 #include "imgui_impl_dx8.h"
 #include "imgui_impl_win32.h"
 #include "debugtools.h"
+#include "fun.h"
 
 // ---------------------------------------------------------------- log + config
 
@@ -38,6 +39,8 @@ struct Config {
     int dumpKey = VK_F11;
     int debugKey = VK_F12;
     bool debugPanel = false;
+    int humanTeam = 0;     // 0 = équipe A (domicile), 1 = équipe B
+    int freezeSeconds = 15;
     int debugRender = 2;   // 0 = hooks seuls, 1 = frame ImGui sans dessin D3D, 2 = overlay complet
 };
 static Config g_cfg;
@@ -50,6 +53,9 @@ static void LoadConfig() {
     g_cfg.debugKey = GetPrivateProfileIntA("Keys", "DebugPanel", VK_F12, g_ini);
     g_cfg.debugPanel = GetPrivateProfileIntA("Debug", "Panel", 0, g_ini) != 0;
     g_cfg.debugRender = GetPrivateProfileIntA("Debug", "Render", 2, g_ini);
+    g_cfg.humanTeam = GetPrivateProfileIntA("General", "HumanTeam", 0, g_ini);
+    g_cfg.freezeSeconds = GetPrivateProfileIntA("General", "FreezeSeconds", 15, g_ini);
+    Fun_Init(g_cfg.humanTeam, g_cfg.freezeSeconds);
 }
 
 static void SaveModeFun() {
@@ -94,11 +100,11 @@ static void HandleKeys() {
         g_cfg.modeFun = !g_cfg.modeFun;
         SaveModeFun();
         g_toastUntil = Now() + 2.0;
+        if (!g_cfg.modeFun) Fun_ReleaseAll();
         Log("Mode FUN %s", g_cfg.modeFun ? "ON" : "OFF");
     }
     if (KeyPressed(g_cfg.testKey) && g_cfg.modeFun) {
-        g_testUntil = Now() + 1.5;
-        Log("Test F10");
+        if (Fun_Shoot()) g_testUntil = Now() + 1.5;
     }
     if (KeyPressed(g_cfg.debugKey)) {
         g_cfg.debugPanel = !g_cfg.debugPanel;
@@ -136,13 +142,23 @@ static void DrawOverlay() {
         OutlinedText(dl, font, size, ImVec2((screen.x - sz.x) / 2, screen.y * 0.30f), col, label);
     }
 
-    // Test de rendu (F10) : texte « WASTED » rouge au centre
+    if (g_cfg.modeFun) {
+        Fun_Tick();
+        Fun_DrawRadar(dl, screen);
+    }
+
+    // Tir (F10) : texte « WASTED » rouge au centre, avec la victime en dessous
     if (g_cfg.modeFun && t < g_testUntil) {
         const char* label = "WASTED";
         float size = screen.y * 0.12f;
         ImVec2 sz = TextSize(font, size, label);
         OutlinedText(dl, font, size, ImVec2((screen.x - sz.x) / 2, (screen.y - sz.y) / 2),
                      IM_COL32(200, 30, 30, 255), label);
+        const char* who = Fun_LastVictim();
+        float small = screen.y * 0.04f;
+        ImVec2 wsz = TextSize(font, small, who);
+        OutlinedText(dl, font, small, ImVec2((screen.x - wsz.x) / 2, (screen.y + sz.y) / 2),
+                     IM_COL32(240, 240, 240, 255), who);
     }
 
     if (g_cfg.debugPanel) {

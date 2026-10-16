@@ -133,6 +133,12 @@ void Debug_DrawPanel() {
         if (pes::Read(pes::ActorPos(i), p) && i == s.actorId)
             ImGui::Text("Porteur n.%d : %8.0f %8.0f", i, p.x, p.z);
     }
+    uint8_t ca = 0, ca2 = 0, cb = 0;
+    pes::Read(pes::kCtrlTeamA, ca);
+    pes::Read(pes::kCtrlTeamA2, ca2);
+    pes::Read(pes::kCtrlTeamB, cb);
+    ImGui::Text("Controle A %08X=%u  %08X=%u", (unsigned)pes::kCtrlTeamA, ca, (unsigned)pes::kCtrlTeamA2, ca2);
+    ImGui::Text("Controle B %08X=%u", (unsigned)pes::kCtrlTeamB, cb);
     FinderPanel();
     ImGui::Text("F11 : copie memoire (%d faites)", g_dumpIndex);
     ImGui::End();
