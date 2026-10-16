@@ -30,6 +30,15 @@ constexpr uintptr_t kActorPos0   = 0x03BDCA60;  // float x, y, z de l'acteur 0 (
 constexpr uintptr_t kActorStride = 0x240;
 constexpr int kActorCount = 23;
 inline uintptr_t ActorPos(int i) { return kActorPos0 + i * kActorStride; }
+// Une fiche commence 0xE0 avant la position. À +0x0E : u16 = identifiant du joueur dans la base.
+constexpr uintptr_t kActorPlayerId = 0x0E;
+inline uintptr_t ActorRecord(int i) { return ActorPos(i) - 0xE0; }
+
+// Base des joueurs (copies du 2026-10-16) : fiches de 124 octets, l'identifiant 1 (Macho) à 0x00C9752C.
+// +0x00 nom en UTF-16 (16 caractères max), +0x20 nom du maillot en ASCII.
+constexpr uintptr_t kPlayerDb = 0x00C9752C;
+constexpr uintptr_t kPlayerDbStride = 124;
+constexpr int kPlayerDbCount = 4783;
 
 // Joueur contrôlé, u8 = index dans le tableau des acteurs (filtre F12 du 2026-10-09, à confirmer) :
 // équipe A : 0x03BCE05C (autre candidat restant : 0x03BCECD0), équipe B : 0x03BCE04C (16 octets avant).
@@ -57,6 +66,18 @@ inline bool Read(uintptr_t addr, T& out) {
 }
 
 struct Vec3 { float x, y, z; };
+
+// Nom (UTF-8) du joueur qui occupe la place i du tableau des acteurs. false si inconnu.
+inline bool ActorName(int i, char* out, int size) {
+    uint16_t id;
+    if (!Read(ActorRecord(i) + kActorPlayerId, id) || id < 1 || id > kPlayerDbCount) return false;
+    uintptr_t rec = kPlayerDb + (id - 1) * kPlayerDbStride;
+    wchar_t name[17] = {};
+    if (!Readable(rec, 32)) return false;
+    memcpy(name, (const void*)rec, 32);
+    if (!name[0]) return false;
+    return WideCharToMultiByte(CP_UTF8, 0, name, -1, out, size, nullptr, nullptr) > 0;
+}
 
 inline bool LooksLikePlayer(uintptr_t p) {
     uint8_t id;

@@ -130,8 +130,11 @@ void Debug_DrawPanel() {
     ImGui::Separator();
     for (int i = 1; i < pes::kActorCount; i++) {
         pes::Vec3 p;
-        if (pes::Read(pes::ActorPos(i), p) && i == s.actorId)
-            ImGui::Text("Porteur n.%d : %8.0f %8.0f", i, p.x, p.z);
+        char name[64] = "?";
+        if (pes::Read(pes::ActorPos(i), p) && i == s.actorId) {
+            pes::ActorName(i, name, sizeof(name));
+            ImGui::Text("Porteur n.%d %s : %8.0f %8.0f", i, name, p.x, p.z);
+        }
     }
     uint8_t ca = 0, ca2 = 0, cb = 0;
     pes::Read(pes::kCtrlTeamA, ca);

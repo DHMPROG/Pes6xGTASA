@@ -184,7 +184,11 @@ static void InitImGui(IDirect3DDevice8* dev) {
     GetWindowsDirectoryA(fontPath, MAX_PATH);
     lstrcatA(fontPath, "\\Fonts\\impact.ttf");
     if (GetFileAttributesA(fontPath) != INVALID_FILE_ATTRIBUTES)
-        g_bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 32.0f);
+    {
+        // Latin-1 + Latin étendu A : accents des noms de joueurs (é, å, č, ł...)
+        static const ImWchar ranges[] = { 0x0020, 0x00FF, 0x0100, 0x017F, 0 };
+        g_bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 32.0f, nullptr, ranges);
+    }
 
     ImGui_ImplWin32_Init(g_hwnd);
     ImGui_ImplDX8_Init(dev);

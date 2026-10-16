@@ -70,9 +70,11 @@ bool Fun_Shoot() {
     f.pos = { bestPos.x, 0.0f, bestPos.z >= 0 ? 9800.0f : -9800.0f };
     f.since = GetTickCount64();
     f.until = f.since + g_freezeMs;
-    wsprintfA(g_victim, "joueur n.%d", best);
-    Log("Tir : %d (%.0f, %.0f) -> %d a %.0f unites, pousse en z=%.0f", me, from.x, from.z, best,
-        sqrtf(bestD), f.pos.z);
+    if (!pes::ActorName(best, g_victim, sizeof(g_victim))) wsprintfA(g_victim, "joueur n.%d", best);
+    char shooter[64] = "?";
+    pes::ActorName(me, shooter, sizeof(shooter));
+    Log("Tir : %d %s (%.0f, %.0f) -> %d %s a %.0f unites, pousse en z=%.0f", me, shooter, from.x, from.z, best,
+        g_victim, sqrtf(bestD), f.pos.z);
     return true;
 }
 
